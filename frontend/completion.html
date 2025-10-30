@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>iBanking - Tuition Completion</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/common.js"></script>
+
+  <style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background: linear-gradient(135deg, #8a4af3 0%, #6c3ce0 50%, #5d33d4 100%);
+        margin: 0;
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Animated background particles */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.04) 0%, transparent 50%);
+        animation: float 8s ease-in-out infinite;
+        z-index: 0;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(1deg); }
+    }
+
+    header { 
+        background: linear-gradient(45deg, #4a1a8a, #6c3ce0);
+        color: white; 
+        padding: 15px 30px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        position: relative;
+        z-index: 100;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 50px;
+    }
+
+    .header-left h1 {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        font-size: 28px;
+        margin: 0;
+    }
+
+    .header-left p {
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .balance {
+        font-weight: 600;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 8px 16px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .logout-btn {
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #4a1a8a;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .logout-btn:hover {
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .top-nav {
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        gap: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 25px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .top-nav button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 20px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .top-nav button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .top-nav .active {
+        background: rgba(255, 255, 255, 0.9);
+        color: #4a1a8a;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .steps { 
+        display: flex; 
+        justify-content: center;
+        margin: 30px auto;
+        max-width: 600px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 50px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 10;
+    }
+
+    .step { 
+        flex: 1; 
+        text-align: center; 
+        font-weight: 600; 
+        font-size: 16px;
+        color: #666;
+        position: relative;
+        padding: 10px;
+    }
+
+    .step.active { 
+        color: #8a4af3;
+        font-weight: 700;
+    }
+
+    .step:not(:last-child)::after {
+        content: '→';
+        position: absolute;
+        right: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8a4af3;
+        font-weight: bold;
+    }
+
+    .container { 
+        display: flex; 
+        justify-content: center;
+        padding: 20px 30px;
+        position: relative;
+        z-index: 10;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .main { 
+        width: 100%;
+        max-width: 800px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        padding: 40px; 
+        border-radius: 20px; 
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.15),
+            0 10px 25px rgba(138, 74, 243, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        text-align: center;
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    @keyframes slideInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .success { 
+        color: #28a745; 
+        font-size: 26px; 
+        font-weight: 700; 
+        margin-bottom: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .success::before {
+        content: '✓';
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #34d058, #28a745);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: bold;
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .main p {
+        margin-bottom: 30px;
+        color: #555;
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 20px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    td { 
+        padding: 15px 20px; 
+        border-bottom: 1px solid rgba(138, 74, 243, 0.1); 
+        text-align: left;
+        font-size: 15px;
+    }
+
+    td:first-child {
+        font-weight: 600;
+        color: #4a1a8a;
+        width: 35%;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    .invoice-box { 
+        margin-top: 20px; 
+        text-align: left;
+        background: rgba(138, 74, 243, 0.05);
+        border-radius: 16px;
+        padding: 25px;
+        border: 1px solid rgba(138, 74, 243, 0.15);
+    }
+
+    .invoice-box h3 {
+        margin: 0 0 15px 0;
+        color: #4a1a8a;
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .btn { 
+        margin-top: 25px; 
+        padding: 16px 30px; 
+        border: none; 
+        border-radius: 12px; 
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        min-width: 200px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .btn-download { 
+        background: linear-gradient(45deg, #8a4af3, #6c3ce0);
+        color: white;
+        box-shadow: 0 6px 20px rgba(138, 74, 243, 0.3);
+    }
+
+    .btn-home { 
+        background: linear-gradient(45deg, #98a2b3, #7f8a9a);
+        color: white;
+        box-shadow: 0 6px 20px rgba(127, 138, 154, 0.3);
+    }
+
+    .btn-download:hover { 
+        background: linear-gradient(45deg, #7a3ae3, #5c2cd0);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(138, 74, 243, 0.4);
+    }
+
+    .btn-home:hover { 
+        background: linear-gradient(45deg, #8b95a6, #6f7a8a);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(127, 138, 154, 0.4);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+    .status-success {
+        color: #28a745;
+        font-weight: 700;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        header {
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
+        }
+        
+        .header-left, .header-right {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .steps {
+            margin: 20px 15px;
+            padding: 15px;
+        }
+        
+        .main {
+            padding: 30px 25px;
+        }
+        
+        .btn {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        td {
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <h1 style="margin: 0;">iBanking</h1>
+      <div>
+        <p style="margin: 0;color: #ada9a9;">Welcome back</p>
+        <p id="user-name" style="margin: 0; font-weight: bold; font-size: 25px;">Loading...</p>
+      </div>
+    </div>
+    <nav class="top-nav">
+      <button onclick="goToPage('account.html')">Account Info</button>
+      <button onclick="goToPage('history.html')">History</button>
+      <button class="active">Tuition Payment</button>
+    </nav>
+    <div class="header-right">
+      <div id="user-balance" class="balance">Balance: Loading...</div>
+      <button class="logout-btn" onclick="logout()">Log out</button>
+    </div>
+  </header>
+
+  <div class="steps">
+    <div class="step">1. Select</div>
+    <div class="step">2. OTP</div>
+    <div class="step active">3. Completion</div>
+  </div>
+
+  <div class="container">
+    <div class="main">
+      <div class="success">Payment Successful!</div>
+      <p>Thank you. Your tuition payment has been completed successfully.</p>
+
+      <div class="invoice-box">
+        <h3>Invoice</h3>
+        <table id="invoiceTable"></table>
+      </div>
+
+      <button class="btn btn-download" onclick="downloadInvoice()">Download Invoice</button>
+      <button class="btn btn-home" onclick="goBackToHome()">Back to Home</button>
+    </div>
+  </div>
+
+  <script>
+    function loadHeader() {
+      if (!checkAuth()) return;
+
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        document.getElementById('user-name').textContent = currentUser.full_name;
+        document.getElementById('user-balance').textContent = 
+          `Balance: ${formatCurrency(currentUser.balance)}`;
+      } catch (err) {
+        console.error("Error", err);
+        logout();
+      }
+    }
+
+  function goToPage(page) {
+    navigateWithBalanceUpdate(page);
+  }
+
+  // Function to go back to home with updated balance
+  async function goBackToHome() {
+    // Clear payment-related localStorage items
+    localStorage.removeItem('paymentId');
+    localStorage.removeItem('otpToken');
+    localStorage.removeItem('invoice');
+    
+    // Update balance before going back
+    await updateUserBalance();
+    window.location.href = 'index.html';
+  }
+
+  window.addEventListener('DOMContentLoaded', loadHeader);
+    window.addEventListener('DOMContentLoaded', () => {
+    let invoice = null;
+    const invoiceData = localStorage.getItem('invoice');
+    if (invoiceData) {
+      invoice = JSON.parse(invoiceData);
+      console.log("Invoice in completion page:", invoice);
+      
+      // Update balance immediately and frequently after successful payment
+      setTimeout(() => {
+        updateUserBalance();
+      }, 500); // Small delay to ensure payment is processed
+      
+      // Set up aggressive interval to refresh balance every 3 seconds after payment
+      const balanceInterval = setInterval(updateUserBalance, 3000);
+      
+      // Clear interval when leaving page
+      window.addEventListener('beforeunload', () => {
+        clearInterval(balanceInterval);
+      });
+      
+    } else {
+      alert("No invoice data found!");
+      window.location.href = 'index.html';
+      return;
+    }
+
+    document.getElementById("invoiceTable").innerHTML = `
+      <tr><td>Transaction ID</td><td>${invoice.paymentId}</td></tr>
+      <tr><td>Student Name</td><td>${invoice.studentName}</td></tr>
+      <tr><td>Student ID</td><td>${invoice.studentId}</td></tr>
+      <tr><td>Amount Paid</td><td>${formatCurrency(invoice.amount)}</td></tr>
+      <tr><td>Date</td><td>${new Date(invoice.paymentDate).toLocaleString()}</td></tr>
+      <tr><td>Status</td><td class="status-success">${invoice.status}</td></tr>
+      <tr><td>Transfer Message</td><td>${invoice.message || '—'}</td></tr>
+    `;
+    });
+    async function downloadInvoice() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const invoiceData = JSON.parse(localStorage.getItem("invoice") || "{}");
+
+      doc.setFontSize(22);
+      doc.text("Tuition Payment Invoice", 14, 18);
+
+      doc.setFontSize(12);
+      doc.text(`Date: ${new Date(invoiceData.paymentDate).toLocaleString()}`, 14, 26);
+
+      doc.autoTable({
+        startY: 34,
+        head: [['Field', 'Value']],
+        body: [
+          ['Transaction ID', invoiceData.paymentId],
+          ['Student Name', invoiceData.studentName],
+          ['Student ID', invoiceData.studentId],
+          ['Amount Paid', new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(invoiceData.amount)],
+          ['Status', invoiceData.status],
+          ['Transfer Message', invoiceData.message || '—————————————————']
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [138, 74, 243] },
+        styles: { fontSize: 11 }
+      });
+
+      doc.save(`Invoice_${invoiceData.paymentId}.pdf`);
+    }
+
+  </script>
+</body>
+</html>

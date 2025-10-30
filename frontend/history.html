@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>iBanking - Tuition</title>
+  <style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background: linear-gradient(135deg, #8a4af3 0%, #6c3ce0 50%, #5d33d4 100%);
+        margin: 0;
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Animated background particles */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.04) 0%, transparent 50%);
+        animation: float 8s ease-in-out infinite;
+        z-index: 0;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(1deg); }
+    }
+
+    header { 
+        background: linear-gradient(45deg, #4a1a8a, #6c3ce0);
+        color: white; 
+        padding: 15px 30px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        position: relative;
+        z-index: 100;
+        backdrop-filter: blur(10px);
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 50px;
+    }
+
+    .header-left h1 {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        font-size: 28px;
+        margin: 0;
+    }
+
+    .header-left p {
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .balance {
+        font-weight: 600;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 8px 16px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .logout-btn {
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #4a1a8a;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .logout-btn:hover {
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .top-nav {
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        gap: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 25px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .top-nav button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 20px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .top-nav button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .top-nav .active {
+        background: rgba(255, 255, 255, 0.9);
+        color: #4a1a8a;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .container { 
+        max-width: 1200px; 
+        margin: 40px auto; 
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        padding: 40px; 
+        border-radius: 20px; 
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.15),
+            0 10px 25px rgba(138, 74, 243, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        animation: slideIn 0.8s ease-out;
+        position: relative;
+        z-index: 10;
+    }
+
+    @keyframes slideIn {
+        0% {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    h2 { 
+        text-align: center; 
+        color: #4a1a8a; 
+        margin: 0 0 30px 0;
+        font-size: 32px;
+        font-weight: 700;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    thead {
+        background: linear-gradient(45deg, #8a4af3, #6c3ce0);
+        color: white;
+    }
+
+    th {
+        padding: 20px 15px;
+        text-align: left;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 14px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    td { 
+        padding: 18px 15px; 
+        border-bottom: 1px solid rgba(138, 74, 243, 0.1);
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.6);
+    }
+
+    tr:hover td {
+        background: rgba(138, 74, 243, 0.05);
+        transform: translateX(2px);
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    td:first-child { 
+        font-weight: 600; 
+        color: #4a1a8a;
+    }
+
+    /* Status styling */
+    .status-completed {
+        color: #28a745;
+        font-weight: bold;
+        background: rgba(40, 167, 69, 0.1);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Loading and empty states */
+    .loading-row, .empty-row {
+        text-align: center;
+        font-style: italic;
+        color: #666;
+        background: rgba(138, 74, 243, 0.05);
+    }
+
+    .loading-row td, .empty-row td {
+        padding: 40px;
+        font-size: 18px;
+    }
+
+    /* Responsive design */
+    @media (max-width: 1024px) {
+        .container {
+            margin: 30px 20px;
+            padding: 30px 20px;
+        }
+        
+        table {
+            font-size: 14px;
+        }
+        
+        th, td {
+            padding: 12px 10px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .header-left {
+            gap: 20px;
+        }
+        
+        .header-left h1 {
+            font-size: 20px;
+        }
+        
+        .top-nav {
+            flex-direction: column;
+            gap: 5px;
+            padding: 10px;
+        }
+        
+        .top-nav button {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+        
+        .container {
+            margin: 20px 10px;
+            padding: 20px 15px;
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            font-size: 12px;
+        }
+        
+        th, td {
+            padding: 8px 6px;
+        }
+        
+        th {
+            font-size: 11px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        header {
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
+        }
+        
+        .header-left, .header-right {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .container {
+            margin: 10px 5px;
+            padding: 15px 10px;
+        }
+        
+        h2 {
+            font-size: 20px;
+        }
+        
+        table {
+            font-size: 11px;
+        }
+        
+        th, td {
+            padding: 6px 4px;
+        }
+        
+        .loading-row td, .empty-row td {
+            padding: 20px;
+            font-size: 14px;
+        }
+    }
+
+    /* Table scroll for mobile */
+    @media (max-width: 600px) {
+        .table-container {
+            overflow-x: auto;
+            margin: 0 -15px;
+            padding: 0 15px;
+        }
+        
+        table {
+            min-width: 500px;
+        }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <h1 style="margin: 0;">iBanking</h1>
+      <div>
+        <p style="margin: 0;color: #ada9a9;">Welcome back</p>
+        <p id="user-name" style="margin: 0; font-weight: bold; font-size: 25px;">Loading...</p>
+      </div>
+    </div>
+    <nav class="top-nav">
+      <button onclick="goToPage('account.html')">Account Info</button>
+      <button class="active" onclick="goToPage('history.html')">History</button>
+      <button onclick="goToPage('index.html')">Tuition Payment</button>
+    </nav>
+    <div class="header-right">
+      <div id="user-balance" class="balance">Balance: Loading...</div>
+      <button class="logout-btn" onclick="logout()">Log out</button>
+    </div>
+  </header>
+  <div class="container">
+    <h2>Payment History</h2>
+    <div class="table-container">
+      <table id="history-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tuition Id</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="loading-row"><td colspan="5">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function loadHeader() {
+        const token = localStorage.getItem('token');
+        const user = localStorage.getItem('user');
+
+        if (!token || !user) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const currentUser = JSON.parse(user);
+
+            const elName = document.getElementById('user-name');
+            if (elName) elName.textContent = currentUser.full_name;
+
+            const elBalance = document.getElementById('user-balance');
+            if (elBalance) elBalance.textContent = `Balance: ${formatCurrency(currentUser.balance)}`;
+
+            const fields = ["full-name", "username", "email", "balance", "created", "last-login"];
+            fields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (id === "balance") el.textContent = formatCurrency(currentUser.balance);
+                else el.textContent = currentUser[id.replace("-", "_")] || "—";
+            }
+            });
+
+        } catch (err) {
+            logout();
+        }
+        }
+
+
+    async function loadHistory(customerId, token) {
+        const tableBody = document.querySelector("#history-table tbody");
+        tableBody.innerHTML = `<tr class="loading-row"><td colspan="5">Loading...</td></tr>`;
+
+        try {
+            const res = await fetch('/api/history', {
+            headers: { "Authorization": "Bearer " + token }
+            });
+
+            const data = await res.json();
+
+            if (data.length === 0) {
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="5">No transactions found</td></tr>`;
+            return;
+            }
+
+            // Filter to only show COMPLETED transactions
+            const completedTransactions = data.filter(tx => tx.status === 'COMPLETED');
+            
+            if (completedTransactions.length === 0) {
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="5">No completed transactions found</td></tr>`;
+            return;
+            }
+
+            tableBody.innerHTML = "";
+            completedTransactions.forEach(tx => {
+            // Since we're only showing COMPLETED transactions, we can simplify the status display
+            const statusDisplay = '<span class="status-completed">COMPLETED</span>';
+            
+            const row = `
+                <tr>
+                <td>${tx.payment_id}</td>
+                <td>${tx.tuition_fee_id}</td>
+                <td>${formatCurrency(tx.amount)}</td>
+                <td>${statusDisplay}</td>
+                <td>${new Date(tx.payment_date).toLocaleString()}</td>
+                </tr>`;
+            tableBody.insertAdjacentHTML("beforeend", row);
+            });
+        } catch (err) {
+            console.error(err);
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="5">Error loading history</td></tr>`;
+        }
+        }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    function goToPage(page) {
+      window.location.href = page;
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('vi-VN').format(amount) + " VND";
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadHeader();
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || "{}");
+        if (token && user.customer_id) {
+            loadHistory(user.customer_id, token);
+        }
+    });  
+    </script>
+</body>
+</html>
+</body>
+</html>

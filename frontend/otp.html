@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>iBanking - OTP</title>
+  <style>
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #8a4af3 0%, #6c3ce0 50%, #5d33d4 100%);
+    margin: 0;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image:
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255,255,255,0.04) 0%, transparent 50%);
+    animation: float 8s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  @keyframes float { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-15px) rotate(1deg)} }
+
+  header {
+    background: linear-gradient(45deg, #4a1a8a, #6c3ce0);
+    color: white;
+    padding: 15px 30px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    position: relative; z-index: 100; backdrop-filter: blur(10px);
+  }
+
+  .header-left { display: flex; align-items: center; gap: 50px; }
+  .header-left h1 { margin: 0; font-size: 28px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+  .header-left p { text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  .balance { font-weight: 600; font-size: 16px; background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+  .logout-btn { padding: 10px 20px; background: rgba(255,255,255,0.9); color: #4a1a8a; border: none; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all .3s ease; box-shadow: 0 4px 15px rgba(0,0,0,.2); }
+  .logout-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+
+  .top-nav { display: flex; justify-content: center; padding: 0; gap: 15px; background: rgba(255,255,255,0.1); border-radius: 25px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+  .top-nav button { padding: 12px 24px; border: none; border-radius: 20px; background: transparent; color: rgba(255,255,255,0.8); font-weight: 600; cursor: pointer; transition: all .3s ease; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; }
+  .top-nav button:hover { background: rgba(255,255,255,0.2); color: #fff; transform: translateY(-1px); }
+  .top-nav .active { background: rgba(255,255,255,0.9); color: #4a1a8a; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+
+  .steps { display: flex; justify-content: center; margin: 30px auto; max-width: 600px; background: rgba(255,255,255,0.95); border-radius: 50px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); backdrop-filter: blur(10px); position: relative; z-index: 10; }
+  .step { flex: 1; text-align: center; font-weight: 600; font-size: 16px; color: #666; position: relative; padding: 10px; }
+  .step.active { color: #8a4af3; font-weight: 700; }
+  .step:not(:last-child)::after { content: '→'; position: absolute; right: -15px; top: 50%; transform: translateY(-50%); color: #8a4af3; font-weight: bold; }
+
+  /* Generic button style (consistent with other pages) */
+  button { margin-top: 25px; padding: 16px 30px; background: linear-gradient(45deg, #8a4af3, #6c3ce0); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; transition: all .3s ease; box-shadow: 0 6px 20px rgba(138,74,243,0.3); width: 100%; }
+  button:hover { background: linear-gradient(45deg, #7a3ae3, #5c2cd0); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(138,74,243,0.4); }
+  button:active { transform: translateY(0); box-shadow: 0 4px 15px rgba(138,74,243,0.3); }
+
+  /* OTP layout */
+  .otp-container { display: flex; justify-content: center; padding: 20px 30px; position: relative; z-index: 10; max-width: 900px; margin: 0 auto; }
+  .otp-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); padding: 40px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 10px 25px rgba(138,74,243,0.2); border: 1px solid rgba(255,255,255,0.3); text-align: center; width: 100%; max-width: 520px; animation: slideInUp .6s ease; }
+  @keyframes slideInUp { 0%{opacity:0; transform: translateY(30px);} 100%{opacity:1; transform: translateY(0);} }
+  .otp-box h2 { margin: 0 0 10px; color: #4a1a8a; font-size: 28px; font-weight: 700; }
+  .otp-box p { margin: 0 0 20px; color: #555; }
+
+  .otp-inputs { display: flex; justify-content: center; gap: 12px; margin: 10px 0 20px; }
+  .otp-inputs input { width: 52px; height: 62px; text-align: center; font-size: 22px; border: 2px solid #e0e0e0; border-radius: 12px; transition: all .25s ease; background: rgba(255,255,255,0.9); }
+  .otp-inputs input:focus { outline: none; border-color: #8a4af3; box-shadow: 0 0 0 3px rgba(138,74,243,0.2); background: #fff; transform: translateY(-1px); }
+
+  .countdown { margin: 15px 0; font-size: 16px; font-weight: 700; color: #8a4af3; text-align: center; }
+  .countdown.expired { color: #dc3545; }
+
+  .back-btn { background: linear-gradient(45deg, #98a2b3, #7f8a9a); box-shadow: 0 6px 20px rgba(127,138,154,0.3); }
+  .back-btn:hover { background: linear-gradient(45deg, #8b95a6, #6f7a8a); }
+
+  .resend { margin-top: 10px; font-size: 14px; }
+  .resend a { color: #8a4af3; text-decoration: none; font-weight: 700; cursor: pointer; }
+  .resend a:hover { text-decoration: underline; }
+
+  @media (max-width: 480px) {
+    header { flex-direction: column; gap: 15px; padding: 15px; }
+    .header-left, .header-right { width: 100%; justify-content: center; }
+    .otp-box { padding: 24px; }
+    .otp-inputs input { width: 46px; height: 56px; }
+  }
+  </style>
+</head>
+<body>
+  <!-- Header giữ nguyên -->
+  <header>
+    <div class="header-left">
+      <h1 style="margin: 0;">iBanking</h1>
+      <div>
+        <p style="margin: 0;color: #ada9a9;">Welcome back</p>
+        <p id="user-name" style="margin: 0; font-weight: bold; font-size: 25px;">Loading...</p>
+      </div>
+    </div>
+    <nav class="top-nav">
+      <button onclick="goToPage('account.html')">Account Info</button>
+      <button onclick="goToPage('history.html')">History</button>
+      <button class="active">Tuition Payment</button>
+    </nav>
+    <div class="header-right">
+      <div id="user-balance" class="balance">Balance: Loading...</div>
+      <button class="logout-btn" onclick="logout()">Log out</button>
+    </div>
+  </header>
+
+  <div class="steps">
+    <div class="step">1. Select</div>
+    <div class="step active">2. OTP</div>
+    <div class="step">3. Completion</div>
+  </div>
+
+  <div class="otp-container">
+    <div class="otp-box">
+      <h2>OTP Authentication</h2>
+      <p>Enter the 6 digit OTP sent to your email.</p>
+      <div class="otp-inputs">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="\\d*">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="\\d*">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="\\d*">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="\\d*">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="\\d*">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="\\d*">
+      </div>
+      <div class="countdown" id="countdown-timer">Time remaining: 05:00</div>
+      <button class="back-btn" onclick="goBack()">Back</button>
+      <button class="login-btn" onclick="verifyOtp()">Confirm</button>
+      <div class="resend">
+        Didn’t receive an OTP? <a onclick="resendOtp()">Resend</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+  function loadHeader() {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+
+    if (!token || !user) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    try {
+      const currentUser = JSON.parse(user);
+      document.getElementById('user-name').textContent = currentUser.full_name;
+      document.getElementById('user-balance').textContent = 
+        `Balance: ${formatCurrency(currentUser.balance)}`;
+      
+      // Fetch updated balance for real-time display
+      fetchLatestBalance();
+    } catch (err) {
+      console.error("Error", err);
+      logout();
+    }
+  }
+
+  // Function to fetch latest balance
+  async function fetchLatestBalance() {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const userProfile = await response.json();
+        document.getElementById('user-balance').textContent = 
+          `Balance: ${formatCurrency(userProfile.balance)}`;
+        
+        // Update localStorage
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        const updatedUser = { ...currentUser, balance: userProfile.balance };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Error fetching latest balance:', error);
+    }
+  }
+
+  function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+  }
+
+  function goToPage(page) {
+    window.location.href = page;
+  }
+
+  async function goBack() {
+    clearInterval(countdownInterval);
+    await cancelCurrentPayment();
+    window.location.href = 'index.html';
+  }
+
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  }
+
+  // Function to cancel current payment
+  async function cancelCurrentPayment() {
+    const paymentId = localStorage.getItem('paymentId');
+    const token = localStorage.getItem('token');
+    
+    if (paymentId && token) {
+      try {
+        await fetch('/api/tuition/cancel-payment', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ paymentId })
+        });
+        console.log('Payment cancelled successfully');
+      } catch (error) {
+        console.error('Error cancelling payment:', error);
+      }
+    }
+  }
+
+  // Countdown timer variables
+  let countdownInterval;
+  let timeRemaining = 5 * 60; // 5 minutes in seconds
+
+  // Initialize countdown timer
+  function startCountdown() {
+    const countdownElement = document.getElementById('countdown-timer');
+    const confirmBtn = document.querySelector('.login-btn');
+    
+    countdownInterval = setInterval(() => {
+      const minutes = Math.floor(timeRemaining / 60);
+      const seconds = timeRemaining % 60;
+      
+      const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      countdownElement.textContent = `Time remaining: ${formattedTime}`;
+      
+      if (timeRemaining <= 60) {
+        countdownElement.classList.add('expired');
+      }
+      
+      if (timeRemaining <= 0) {
+        clearInterval(countdownInterval);
+        countdownElement.textContent = 'OTP has expired!';
+        countdownElement.classList.add('expired');
+        confirmBtn.disabled = true;
+        confirmBtn.style.background = '#ccc';
+        confirmBtn.style.cursor = 'not-allowed';
+        
+        // Auto cancel payment when OTP expires
+        cancelCurrentPayment();
+        
+        // Show expired message
+        alert('OTP has expired. You will be redirected to the payment page.');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+        return;
+      }
+      
+      timeRemaining--;
+    }, 1000);
+  }
+
+  // Resend OTP helper
+  async function resendOtp() {
+    const paymentId = localStorage.getItem('paymentId');
+    const token = localStorage.getItem('token');
+    
+    console.log('Resend OTP clicked:', { paymentId, token: token ? 'exists' : 'missing' });
+    
+    if (!paymentId || !token) {
+      alert('Missing payment session. Please start again.');
+      window.location.href = 'index.html';
+      return;
+    }
+    try {
+      console.log('Sending resend OTP request...');
+      const res = await fetch('/api/tuition/resend-otp', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId })
+      });
+      
+      console.log('Response status:', res.status);
+      
+      const data = await res.json().catch(() => ({}));
+      console.log('Response data:', data);
+      
+      if (res.ok) {
+        // Cập nhật token mới
+        if (data.otpToken) {
+          localStorage.setItem('otpToken', data.otpToken);
+          console.log('Updated OTP token in localStorage');
+        }
+        alert('A new OTP has been sent to your email.');
+        // reset countdown
+        clearInterval(countdownInterval);
+        timeRemaining = 5 * 60;
+        const confirmBtn = document.querySelector('.login-btn');
+        if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.style.removeProperty('background'); confirmBtn.style.removeProperty('cursor'); }
+        document.getElementById('countdown-timer').classList.remove('expired');
+        startCountdown();
+        // Clear OTP inputs
+        const otpInputs = document.querySelectorAll('.otp-inputs input');
+        otpInputs.forEach(input => input.value = '');
+        otpInputs[0].focus();
+      } else {
+        console.error('Resend OTP failed:', data);
+        alert(data.message || 'Unable to resend OTP.');
+      }
+    } catch (e) {
+      console.error('Error resending OTP:', e);
+      alert('Network error. Please try again.');
+    }
+  }
+
+  // Cancel payment when leaving page
+  window.addEventListener('beforeunload', function(e) {
+    const paymentId = localStorage.getItem('paymentId');
+    const token = localStorage.getItem('token');
+    
+    if (paymentId && token) {
+      // Use fetch with keepalive for reliable request on page unload
+      fetch('/api/tuition/cancel-payment', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ paymentId }),
+        keepalive: true
+      }).catch(error => {
+        console.error('Error cancelling payment on page unload:', error);
+      });
+    }
+  });
+
+  // chạy ngay khi trang load
+  window.addEventListener('DOMContentLoaded', function() {
+    loadHeader();
+    startCountdown();
+    
+    // Set up interval to refresh balance every 15 seconds
+    const balanceInterval = setInterval(fetchLatestBalance, 15000);
+    
+    // Clear interval when leaving page
+    window.addEventListener('beforeunload', () => {
+      clearInterval(balanceInterval);
+    });
+  });
+  
+  const otpInputs = document.querySelectorAll('.otp-inputs input');
+    
+    otpInputs.forEach((input, index) => {
+      input.addEventListener('input', function() {
+        if (this.value.length === 1 && index < otpInputs.length - 1) {
+          otpInputs[index + 1].focus();
+        }
+      });
+      
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && this.value === '' && index > 0) {
+          otpInputs[index - 1].focus();
+        }
+      });
+    });
+
+    window.addEventListener('load', function() {
+      otpInputs[0].focus();
+    });
+    async function verifyOtp() {
+      const otpInputs = document.querySelectorAll('.otp-inputs input');
+  
+      let otp = '';
+      otpInputs.forEach(input => {
+        otp += input.value;
+      });
+
+      if (otp.length !== 6) {
+        alert("Please enter all 6 digits of OTP!");
+        return;
+      }
+
+      console.log("OTP entered:", otp);
+      const paymentId = localStorage.getItem('paymentId');
+      const otpToken = localStorage.getItem('otpToken');
+      const token = localStorage.getItem('token');
+
+      try {
+        const response = await fetch('/api/tuition/complete-payment', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ paymentId, otp, otpToken })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          // Stop countdown on successful verification
+          clearInterval(countdownInterval);
+          
+          // Clear payment data from localStorage when successful
+          localStorage.removeItem('paymentId');
+          localStorage.removeItem('otpToken');
+          
+          alert('Payment success!');
+          localStorage.setItem('invoice', JSON.stringify(data.invoice));
+          window.location.href = 'completion.html'; 
+        } else {
+          alert(data.message || 'Invalid OTP');
+        }
+      } catch (error) {
+        console.error('Error verifying OTP:', error);
+        alert('Network error. Please try again.');
+    }
+}
+  </script>
+</body>
+</html>

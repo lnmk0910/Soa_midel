@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <style>
+    * {
+        box-sizing: border-box;
+    }
+    
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background: linear-gradient(135deg, #8a4af3 0%, #6c3ce0 50%, #5d33d4 100%);
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Animated background particles */
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    header { 
+        background: linear-gradient(45deg, #4a1a8a, #6c3ce0);
+        color: white; 
+        padding: 15px 30px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 10;
+    }
+
+    header div {
+        font-size: 24px;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        z-index: 5;
+    }
+
+    .box {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.2),
+            0 10px 25px rgba(138, 74, 243, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        width: 400px;
+        max-width: 90vw;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        animation: slideIn 0.8s ease-out;
+        position: relative;
+    }
+
+    @keyframes slideIn {
+        0% {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .box::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: -1px;
+        right: -1px;
+        bottom: -1px;
+        background: linear-gradient(45deg, #8a4af3, #6c3ce0, #5d33d4);
+        border-radius: 20px;
+        z-index: -1;
+        opacity: 0.3;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #4a1a8a;
+        font-size: 28px;
+        font-weight: 600;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+        display: block;
+        margin-top: 20px;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    input {
+        width: 100%;
+        padding: 15px 20px;
+        margin-top: 5px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #8a4af3;
+        box-shadow: 0 0 0 3px rgba(138, 74, 243, 0.2);
+        background: white;
+        transform: translateY(-1px);
+    }
+
+    button {
+        margin-top: 30px;
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(45deg, #8a4af3, #6c3ce0);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(138, 74, 243, 0.3);
+    }
+
+    button:hover {
+        background: linear-gradient(45deg, #7a3ae3, #5c2cd0);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(138, 74, 243, 0.4);
+    }
+
+    button:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 15px rgba(138, 74, 243, 0.3);
+    }
+
+    button:disabled {
+        background: linear-gradient(45deg, #ccc, #999);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    #error-message {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 15px;
+        color: #dc3545;
+        font-weight: 500;
+    }
+
+    /* Responsive design */
+    @media (max-width: 480px) {
+        .box {
+            padding: 30px 20px;
+            margin: 20px;
+        }
+        
+        header {
+            padding: 10px 20px;
+        }
+        
+        header div {
+            font-size: 20px;
+        }
+        
+        h2 {
+            font-size: 24px;
+        }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>Student Portal</div>
+  </header>
+
+  <div class="container">
+    <div class="box">
+        <h2>Login</h2>
+        <div id="error-message" style="color: red; text-align: center; margin-bottom: 10px; display: none;"></div>
+        <form id="loginForm">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required>
+    
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required>
+    
+          <button type="submit" id="loginBtn">Login</button>
+        </form>
+      </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('error-message');
+      const loginBtn = document.getElementById('loginBtn');
+      
+      // Reset error message
+      errorDiv.style.display = 'none';
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logging in...';
+      
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Lưu token và thông tin user vào localStorage
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.customer));
+          
+          // Chuyển hướng đến trang chính
+          window.location.href = 'index.html';
+        } else {
+          // Hiển thị lỗi
+          errorDiv.textContent = data.message || 'Login failed';
+          errorDiv.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        errorDiv.textContent = 'Network error. Please try again.';
+        errorDiv.style.display = 'block';
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+      }
+    });
+
+    // Kiểm tra nếu đã đăng nhập thì chuyển hướng
+    if (localStorage.getItem('token')) {
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
+
+
